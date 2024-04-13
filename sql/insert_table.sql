@@ -35,16 +35,10 @@ INSERT INTO State (StateId, StateName)
 VALUES (5, 'Tamil Nadu');
 
 -- Grievances (Indian-specific categories)
-INSERT INTO Grievance (GrievanceId, 3,DepartmentId, UserId, Category, Description, Status, DateSubmitted, DateResolved)
+INSERT INTO Grievance (GrievanceId,DepartmentId, UserId, Category, Description, Status, DateSubmitted, DateResolved)
 VALUES (1, 'PW', 'user123', 'Water Shortage', 'Requesting immediate water supply restoration in my area', 'Open', '2024-04-01', NULL);
-INSERT INTO Grievance (GrievanceId, 2,DepartmentId, UserId, Category, Description, Status, DateSubmitted, DateResolved)
-VALUES (2, 'UD', 'user456', 4,'Pothole Repair', 'Large pothole on main road causing traffic congestion', 'Pending Inspection', '2024-03-25', NULL);
-INSERT INTO Grievance (GrievanceId, DepartmentId, UserId, Category, Description, Status, DateSubmitted, DateResolved)
-VALUES (3, 'Mktg', 'manager1',3, 'Budgetary Constraints', 'Requesting additional budget allocation for upcoming campaign', 'Under Review', '2024-04-03', NULL);
-INSERT INTO Grievance (GrievanceId, DepartmentId, UserId, Category, Description, Status, DateSubmitted, DateResolved)
-VALUES (4, 'Fin', 'hr_rep', 1,'Salary Discrepancy', 'Incorrect salary credited for the month of March', 'Awaiting Resolution', '2024-04-04', NULL);
-INSERT INTO Grievance (GrievanceId, DepartmentId, UserId, Category, Description, Status, DateSubmitted, DateResolved)
-VALUES (5, 'Sales', 1,'user123', 'Meeting Room Availability', 'Meeting room unavailable for scheduled client meeting', 'Resolved - Alternate room allocated', '2024-04-02', '2024-04-02');
+INSERT INTO Grievance (GrievanceId,DepartmentId, UserId, Category, Description, Status, DateSubmitted, DateResolved)
+VALUES (2, 'UD', 'user456',     'Pothole Repair', 'Large pothole on main road causing traffic congestion', 'Pending', '2024-03-25', NULL);
 
 -- Comments
 INSERT INTO Comment (CommentId, GrievanceId, UserId, Comment, DateCommented)
