@@ -37,6 +37,7 @@ values ('sales', 2); -- sales department
 
 
 -- grievances (indian-specific categories)
+
 insert into grievance (grievanceid, stateid, departmentid, userid, category, description, status, datesubmitted, dateresolved)
 values (3, 2,'pw', 'user123', 'water shortage', 'requesting immediate water supply restoration in my area', 'open', '2024-04-01', null);
 insert into grievance (grievanceid, stateid, departmentid, userid, category, description, status, datesubmitted, dateresolved)
