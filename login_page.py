@@ -2,6 +2,7 @@ import mysql.connector
 import streamlit as st
 import pandas as pd
 import numpy as np
+from io import StringIO
 import random
 
 # Function to authenticate user
@@ -28,6 +29,45 @@ def insert_grievance(state_id, user_id, category, description, date_submitted, d
     connection.commit()
 
 
+def get_grievance_data_with_map(cursor):
+    """
+  Fetches grievance data by state, generates random points, and displays them on a map.
+
+  Args:
+      cursor: A database cursor object.
+
+  Returns:
+      None
+  """
+    state_coords = {"karnataka": [15.3173, 75.7139], "gujarat": [22.6708, 71.5724], "tamil nadu": [11.1271, 78.6569],
+                    "maharashtra": [19.7515, 75.7139]}
+
+    # Get grievance data
+    cursor.execute("""SELECT s.StateName, COUNT(g.GrievanceId) AS GrievanceCount
+                    FROM grievance g
+                    INNER JOIN state s ON g.StateId = s.StateId
+                    GROUP BY s.StateName
+                    ORDER BY GrievanceCount DESC;
+                """)
+    data = cursor.fetchall()
+
+    # Combine all data into a single DataFrame
+    all_data = pd.DataFrame(columns=['lat', 'lon'])
+    for row in data:
+        state_name = row[0]
+        count = row[1]
+
+        if state_name.lower() in state_coords:
+            state_lat_lon = state_coords[state_name.lower()]
+            data_points = pd.DataFrame(
+                np.random.randn(count * 4, 2) * count * 10 / [50, 50] + state_lat_lon,
+                columns=['lat', 'lon'])
+            all_data = pd.concat([all_data, data_points], ignore_index=True)
+
+    # Display data on map
+    st.map(all_data)
+
+
 # Streamlit GUI
 def main():
     # Initialize session state
@@ -37,13 +77,12 @@ def main():
     if st.session_state.user_id == "root":
         st.title("CitizenVoice — Admin")
 
-    df = pd.DataFrame(
-        np.random.randn(1000, 2) / [50, 50] + [37.76, -122.4],
-        columns=['lat', 'lon'])
-
-    st.map(df)
     # Navigation menu
     page = st.sidebar.radio("Navigation", ["Login", "Submit Grievance", "View Grievances"])
+
+    if page != "Login" and st.session_state.user_id:
+        get_grievance_data_with_map(cursor)
+
     if page == "Login":
         st.header("User Authentication")
 
@@ -80,6 +119,11 @@ def main():
             category = st.selectbox("Category", ["Road Issues", "Water Issues"])
             description = st.text_area("Description")
             date_submitted = st.date_input("Date Submitted")
+            uploaded_file = st.file_uploader("Choose a file")
+            if uploaded_file is not None:
+                # To read file as bytes:
+                # bytes_data = uploaded_file.getvalue()
+                st.write(uploaded_file.type + " uploaded")
 
             if st.button("Submit Grievance"):
                 if state_name and category and description and date_submitted:
@@ -104,6 +148,7 @@ def main():
             st.write("Welcome, " + st.session_state.user_id + "!")
         else:
             st.write("")
+
 
 if __name__ == "__main__":
     # Connect to the MySQL database

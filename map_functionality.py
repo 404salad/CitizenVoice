@@ -15,23 +15,48 @@ if connection.is_connected():
 else:
     print('Failed to connect to MySQL database')
 
-    cursor = connection.cursor()
-    
+cursor = connection.cursor()
 
 
-d1={"karnataka":[15.3173, 75.7139],"gujarat":[22.6708,71.5724],"tamilnadu":[11.1271,78.6569],"maharashtra":[19.7515,75.7139]}
+def get_grievance_data_with_map(cursor):
+    """
+  Fetches grievance data by state, generates random points, and displays them on a map.
 
-state_name = st.text_input("Enter the state name:")
+  Args:
+      cursor: A database cursor object.
+
+  Returns:
+      None
+  """
+
+    # Get grievance data
+    cursor.execute("""SELECT s.StateName, COUNT(g.GrievanceId) AS GrievanceCount
+                    FROM grievance g
+                    INNER JOIN state s ON g.StateId = s.StateId
+                    GROUP BY s.StateName
+                    ORDER BY GrievanceCount DESC;
+                """)
+    data = cursor.fetchall()
+
+    # Combine all data into a single DataFrame
+    all_data = pd.DataFrame(columns=['lat', 'lon'])
+    for row in data:
+        state_name = row[0]
+        count = row[1]
+
+        if state_name.lower() in state_coords:
+            state_lat_lon = state_coords[state_name.lower()]
+            data_points = pd.DataFrame(
+                np.random.randn(count * 4, 2) * count * 10 / [50, 50] + state_lat_lon,
+                columns=['lat', 'lon'])
+            all_data = pd.concat([all_data, data_points], ignore_index=True)
+
+    # Display data on map
+    st.write(data)  # Show grievance data table (optional)
+    st.map(all_data)
 
 
-if state_name.lower() in d1:
-    
-    state_lat_lon = d1[state_name.lower()]
-
-    df = pd.DataFrame(
-        np.random.randn(20, 2) * 10 / [50, 50] + state_lat_lon,
-        columns=['lat', 'lon'])
-
-
-
-    st.map(df)
+# Call the function
+state_coords = {"karnataka": [15.3173, 75.7139], "gujarat": [22.6708, 71.5724], "tamil nadu": [11.1271, 78.6569],
+                "maharashtra": [19.7515, 75.7139]}
+get_grievance_data_with_map(cursor)
