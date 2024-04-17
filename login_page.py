@@ -2,6 +2,7 @@ import mysql.connector
 import streamlit as st
 import pandas as pd
 import numpy as np
+from datetime import date
 from io import StringIO
 import random
 
@@ -44,11 +45,12 @@ def get_grievance_data_with_map(cursor):
 
     # Get grievance data
     cursor.execute("""SELECT s.StateName, COUNT(g.GrievanceId) AS GrievanceCount
-                    FROM grievance g
-                    INNER JOIN state s ON g.StateId = s.StateId
-                    GROUP BY s.StateName
-                    ORDER BY GrievanceCount DESC;
-                """)
+                      FROM grievance g
+                      INNER JOIN state s ON g.StateId = s.StateId
+                      GROUP BY s.StateName, g.status
+                      HAVING g.status='pending'
+                      ORDER BY GrievanceCount DESC;
+                  """)
     data = cursor.fetchall()
 
     # Combine all data into a single DataFrame
@@ -142,12 +144,80 @@ def main():
         else:
             st.error("Please login to submit a grievance.")
 
-    elif page == "Submit Grievance":
-        st.header("Submit Grievance")
-        if st.session_state.user_id:
-            st.write("Welcome, " + st.session_state.user_id + "!")
-        else:
-            st.write("")
+    elif page == "View Grievances":
+        st.title('Admin View')
+        if not st.session_state.user_id=="root":
+            st.error("Please login as admin to view grievances")
+            return
+        # Dropdown to select state
+        selected_state = st.selectbox('Select State:', ['Gujarat', 'Maharashtra', 'Karnataka', 'Delhi', 'Tamil Nadu'])
+
+        # button for grievances
+
+        if st.button('View Grievances'):
+            # Convert state name to state ID
+            state_mapping = {'Gujarat': 1, 'Maharashtra': 2, 'Karnataka': 3, 'Delhi': 4, 'Tamil Nadu': 5}
+            state_id = state_mapping[selected_state]
+
+            # Fetch grievances associated with the selected state
+            query = f"SELECT * FROM grievance WHERE StateId = {state_id} AND Status = 'pending';"
+            cursor.execute(query)
+            grievances = cursor.fetchall()
+
+            # Display the grievances
+            if grievances:
+                st.write("Grievances associated with", selected_state)
+                # Create a list of dictionaries to hold the grievance information
+                grievance_list = []
+                for grievance in grievances:
+                    print(grievance)
+                    grievance_dict = {
+                        "Grievance ID": grievance[0],
+                        "Department ID": grievance[2],
+                        "User ID": grievance[3],
+                        "Category": grievance[4],
+                        "Description": grievance[5],
+                        "Date Submitted": grievance[7],
+                        "Date Resolved": grievance[8]
+                    }
+                    grievance_list.append(grievance_dict)
+                # Display the grievances in a table
+                st.table(pd.DataFrame(grievance_list))
+            else:
+                st.write("No grievances found for", selected_state)
+
+        # Text input for grievance ID
+        grievance_id = st.text_input('Enter Grievance ID:')
+        admin_comment = st.text_area('Enter Comment (Optional)')
+
+
+        # Button to resolve grievance
+        if st.button('Resolve Grievance'):
+            # Check if grievance ID is provided
+            if grievance_id:
+                # Convert state name to state ID
+                state_mapping = {'Gujarat': 1, 'Maharashtra': 2, 'Karnataka': 3, 'Delhi': 4, 'Tamil Nadu': 5}
+                state_id = state_mapping[selected_state]
+
+                # Update grievance status and date resolved in database
+                update_query = f"UPDATE grievance SET status = 'resolved', dateresolved = '{date.today()}' WHERE GrievanceId = {grievance_id} AND StateId = {state_id};"
+                cursor.execute(update_query)
+                connection.commit()
+
+                query = f"SELECT UserId FROM grievance WHERE GrievanceId = {grievance_id}"
+                cursor.execute(query)
+
+                commenter_id = cursor.fetchall()
+                st.write(commenter_id)
+
+                grievance_id = random.randint(1000, 9999)
+                query = f"insert into table comment values ({np.random.randint(1,100000)},{grievance_id}, '{commenter_id[0][0]}','{admin_comment}', '{date.today()}')"
+                st.write(query)
+                cursor.execute(query)
+
+                st.success(f"Grievance {grievance_id} in {selected_state} has been resolved.")
+            else:
+                st.error("Please enter a grievance ID.")
 
 
 if __name__ == "__main__":
