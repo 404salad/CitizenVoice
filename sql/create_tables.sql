@@ -1,15 +1,10 @@
-CREATE TABLE State (
+CREATE TABLE state (
   StateId INT PRIMARY KEY,
   StateName VARCHAR(255)
 );
 
 
-CREATE TABLE Department (
-  DepartmentId VARCHAR(255) PRIMARY KEY,
-  StateId INT REFERENCES State(StateId)
-);
-
-CREATE TABLE User (
+CREATE TABLE user (
   UserId VARCHAR(255) PRIMARY KEY,
   FirstName VARCHAR(255),
   LastName VARCHAR(255),
@@ -17,11 +12,16 @@ CREATE TABLE User (
   PasswordHash VARCHAR(255) NOT NULL
 );
 
+CREATE TABLE department (
+  DepartmentId VARCHAR(255) PRIMARY KEY,
+  StateId INT REFERENCES state(StateId)
+);
 
-CREATE TABLE Grievance (
+
+CREATE TABLE grievance (
   GrievanceId INT PRIMARY KEY,
-  StateId INT REFERENCES State(StateId),
-  DepartmentId VARCHAR(255) REFERENCES Department(DepartmentId),
+  StateId INT REFERENCES state(StateId),
+  DepartmentId VARCHAR(255) REFERENCES department(DepartmentId),
   UserId VARCHAR(255),
   Category VARCHAR(255),
   Description VARCHAR(255),
@@ -30,17 +30,17 @@ CREATE TABLE Grievance (
   DateResolved DATE
 );
 
-CREATE TABLE Comment (
+CREATE TABLE comment (
   CommentId INT PRIMARY KEY,
-  GrievanceId INT REFERENCES Grievance(GrievanceId),
-  UserId VARCHAR(255) REFERENCES User(UserId),
+  GrievanceId INT REFERENCES grievance(GrievanceId),
+  UserId VARCHAR(255) REFERENCES user(UserId),
   Comment VARCHAR(255),
   DateCommented DATE
 );
 
-CREATE TABLE Attachment (
+CREATE TABLE attachment (
   AttachmentId INT PRIMARY KEY,
-  GrievanceId INT REFERENCES Grievance(GrievanceId),
+  GrievanceId INT REFERENCES grievance(GrievanceId),
   Username VARCHAR(255),
   PhoneNo INT,
   DateAttached VARCHAR(255),

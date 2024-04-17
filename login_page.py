@@ -1,17 +1,18 @@
 import mysql.connector
 import streamlit as st
 import pandas as pd
+import numpy as np
 import random
 
 # Function to authenticate user
 def authenticate(username, password):
-    cursor.execute("SELECT * FROM User WHERE UserId = %s and PasswordHash = %s", (username, password))
+    cursor.execute("SELECT * FROM user WHERE UserId = %s and PasswordHash = %s", (username, password))
     data = cursor.fetchall()
     return data
 
 # Function to retrieve StateId based on StateName
 def get_state_id(state_name):
-    cursor.execute("SELECT StateId FROM State WHERE StateName = %s", (state_name,))
+    cursor.execute("SELECT StateId FROM state WHERE StateName = %s", (state_name,))
     data = cursor.fetchone()
     if data:
         return data[0]
@@ -22,23 +23,29 @@ def get_state_id(state_name):
 def insert_grievance(state_id, user_id, category, description, date_submitted, department_id):
     grievance_id = random.randint(1000, 9999)  # Generating a random grievance ID
     status = "Pending"  # Setting initial status as Pending
-    cursor.execute("INSERT INTO Grievance (GrievanceId, StateId, DepartmentId, UserId, Category, Description, Status, DateSubmitted) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+    cursor.execute("INSERT INTO grievance (GrievanceId, StateId, DepartmentId, UserId, Category, Description, Status, DateSubmitted) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
                    (grievance_id, state_id, department_id, user_id, category, description, status, date_submitted))
     connection.commit()
 
+
 # Streamlit GUI
 def main():
-    st.title("User Authentication and Grievance Submission")
-
     # Initialize session state
     if 'user_id' not in st.session_state:
         st.session_state.user_id = None
 
-    # Navigation menu
-    page = st.sidebar.radio("Navigation", ["Login", "Submit Grievance"])
+    if st.session_state.user_id == "root":
+        st.title("CitizenVoice — Admin")
 
+    df = pd.DataFrame(
+        np.random.randn(1000, 2) / [50, 50] + [37.76, -122.4],
+        columns=['lat', 'lon'])
+
+    st.map(df)
+    # Navigation menu
+    page = st.sidebar.radio("Navigation", ["Login", "Submit Grievance", "View Grievances"])
     if page == "Login":
-        st.title("User Authentication")
+        st.header("User Authentication")
 
         # Input fields for username and password
         username = st.text_input("Username")
@@ -47,17 +54,25 @@ def main():
         # Button to authenticate user
         if st.button("Login"):
             if username and password:
-                result = authenticate(username, password)
-                if len(result) > 0:
-                    st.success("Authentication successful!")
-                    st.session_state.user_id = username  # Setting user_id to the logged-in username
+                # if the user is root user they are allowed to view complaints
+                if username == "root" and password == "root":
+                    st.session_state.user_id = "root"
+
                 else:
-                    st.error("Authentication failed. Invalid username or password.")
+                    result = authenticate(username, password)
+                    if len(result) > 0:
+                        st.success("Authentication successful!")
+                        st.session_state.user_id = username  # Setting user_id to the logged-in username
+                    else:
+                        st.error("Authentication failed. Invalid username or password.")
             else:
                 st.warning("Please enter username and password.")
 
+        if st.button("Logout"):
+            st.session_state.user_id = None
+
     elif page == "Submit Grievance":
-        st.title("Submit Grievance")
+        st.header("Submit Grievance")
         if st.session_state.user_id:
             st.write("Welcome, " + st.session_state.user_id + "!")
             # Grievance submission form
@@ -81,7 +96,14 @@ def main():
                 else:
                     st.error("Please fill in all the fields.")
         else:
-            st.write("Please login to submit a grievance.")
+            st.error("Please login to submit a grievance.")
+
+    elif page == "Submit Grievance":
+        st.header("Submit Grievance")
+        if st.session_state.user_id:
+            st.write("Welcome, " + st.session_state.user_id + "!")
+        else:
+            st.write("")
 
 if __name__ == "__main__":
     # Connect to the MySQL database

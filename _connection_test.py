@@ -12,7 +12,7 @@ print('connected')
 
 cursor = connection.cursor()
 
-cursor.execute("Select * from Grievance")
+cursor.execute("Select * from grievance")
 data = cursor.fetchall()
 
 st.title('MYSQL Connection')

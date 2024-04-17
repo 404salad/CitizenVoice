@@ -1,47 +1,50 @@
--- Users (Remember to replace with strong, unique passwords):
-INSERT INTO User (UserId, FirstName, LastName, Email, PasswordHash)
-VALUES ('user123', 'Rahul', 'Sharma', 'user123@mycompany.com', 'pass123');
-INSERT INTO User (UserId, FirstName, LastName, Email, PasswordHash)
-VALUES ('user456', 'Priya', 'Desai', 'user456@mycompany.com', 'pass456');
-INSERT INTO User (UserId, FirstName, LastName, Email, PasswordHash)
-VALUES ('admin', 'System', 'Admin', 'admin@mycompany.com', 'pass');
-INSERT INTO User (UserId, FirstName, LastName, Email, PasswordHash)
-VALUES ('manager1', 'Vikram', 'Singh', 'manager1@mycompany.com', 'pass1');
-INSERT INTO User (UserId, FirstName, LastName, Email, PasswordHash)
-VALUES ('hr_rep', 'Aisha', 'Kapoor', 'hr_rep@mycompany.com', 'pass');
+-- states
+insert into state (stateid, statename)
+values (1, 'gujarat');
+insert into state (stateid, statename)
+values (2, 'maharashtra');
+insert into state (stateid, statename)
+values (3, 'karnataka');
+insert into state (stateid, statename)
+values (4, 'delhi');
+insert into state (stateid, statename)
+values (5, 'tamil nadu');
 
--- Departments
-INSERT INTO Department (DepartmentId, StateId)
-VALUES ('PW', 1); -- Public Works Department
-INSERT INTO Department (DepartmentId, StateId)
-VALUES ('UD', 2); -- Urban Development Department
-INSERT INTO Department (DepartmentId, StateId)
-VALUES ('Mktg', 3); -- Marketing Department
-INSERT INTO Department (DepartmentId, StateId)
-VALUES ('Fin', 1); -- Finance Department
-INSERT INTO Department (DepartmentId, StateId)
-VALUES ('Sales', 2); -- Sales Department
+-- users (remember to replace with strong, unique passwords):
+insert into user (userid, firstname, lastname, email, passwordhash)
+values ('user123', 'rahul', 'sharma', 'user123@mycompany.com', 'pass123');
+insert into user (userid, firstname, lastname, email, passwordhash)
+values ('user456', 'priya', 'desai', 'user456@mycompany.com', 'pass456');
+insert into user (userid, firstname, lastname, email, passwordhash)
+values ('admin', 'system', 'admin', 'admin@mycompany.com', 'pass');
+insert into user (userid, firstname, lastname, email, passwordhash)
+values ('manager1', 'vikram', 'singh', 'manager1@mycompany.com', 'pass1');
+insert into user (userid, firstname, lastname, email, passwordhash)
+values ('hr_rep', 'aisha', 'kapoor', 'hr_rep@mycompany.com', 'pass');
 
--- States
-INSERT INTO State (StateId, StateName)
-VALUES (1, 'Gujarat');
-INSERT INTO State (StateId, StateName)
-VALUES (2, 'Maharashtra');
-INSERT INTO State (StateId, StateName)
-VALUES (3, 'Karnataka');
-INSERT INTO State (StateId, StateName)
-VALUES (4, 'Delhi');
-INSERT INTO State (StateId, StateName)
-VALUES (5, 'Tamil Nadu');
 
--- Grievances (Indian-specific categories)
-INSERT INTO Grievance (GrievanceId,DepartmentId, UserId, Category, Description, Status, DateSubmitted, DateResolved)
-VALUES (1, 'PW', 'user123', 'Water Shortage', 'Requesting immediate water supply restoration in my area', 'Open', '2024-04-01', NULL);
-INSERT INTO Grievance (GrievanceId,DepartmentId, UserId, Category, Description, Status, DateSubmitted, DateResolved)
-VALUES (2, 'UD', 'user456',     'Pothole Repair', 'Large pothole on main road causing traffic congestion', 'Pending', '2024-03-25', NULL);
+-- departments
+insert into department (departmentid, stateid)
+values ('pw', 1); -- public works department
+insert into department (departmentid, stateid)
+values ('ud', 2); -- urban development department
+insert into department (departmentid, stateid)
+values ('mktg', 3); -- marketing department
+insert into department (departmentid, stateid)
+values ('fin', 1); -- finance department
+insert into department (departmentid, stateid)
+values ('sales', 2); -- sales department
 
--- Comments
-INSERT INTO Comment (CommentId, GrievanceId, UserId, Comment, DateCommented)
-VALUES (1, 1, 'admin', 'Water tanker dispatched to your area. Expect supply within 2 hours', '2024-04-02');
-INSERT INTO Comment (CommentId, GrievanceId, UserId, Comment, DateCommented)
-VALUES (2, 2, 'user456', 'Images attached for reference', '2024-03-02');
+
+-- grievances (indian-specific categories)
+insert into grievance (grievanceid,departmentid, userid, category, description, status, datesubmitted, dateresolved)
+values (1, 'pw', 'user123', 'water shortage', 'requesting immediate water supply restoration in my area', 'open', '2024-04-01', null);
+insert into grievance (grievanceid,departmentid, userid, category, description, status, datesubmitted, dateresolved)
+values (2, 'ud', 'user456',     'pothole repair', 'large pothole on main road causing traffic congestion', 'pending', '2024-03-25', null);
+
+-- comments
+insert into comment (commentid, grievanceid, userid, comment, datecommented)
+values (1, 1, 'admin', 'water tanker dispatched to your area. expect supply within 2 hours', '2024-04-02');
+insert into comment (commentid, grievanceid, userid, comment, datecommented)
+values (2, 2, 'user456', 'images attached for reference', '2024-03-02');
+
