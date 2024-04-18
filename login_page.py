@@ -69,6 +69,28 @@ def get_grievance_data_with_map(cursor):
     # Display data on map
     st.map(all_data)
 
+def fetch_user_grievances(user_id):
+    # Your code to fetch grievances associated with the given user_id from the database
+    # Replace this with your actual database query
+    # Sample code assuming you have a database connection named `cursor`
+    cursor.execute(f"SELECT * FROM grievance WHERE UserId = '{user_id}'")
+    user_grievances = cursor.fetchall()
+
+    # Convert the fetched data into a list of dictionaries for easy display
+    grievances_list = []
+    for grievance in user_grievances:
+        grievance_dict = {
+            "GrievanceId": grievance[0],
+            "Status": grievance[6],
+            "Description": grievance[5],
+            # Add more fields as needed
+        }
+        grievances_list.append(grievance_dict)
+
+    return grievances_list
+    
+    
+
 
 # Streamlit GUI
 def main():
@@ -123,7 +145,7 @@ def main():
             date_submitted = st.date_input("Date Submitted")
             uploaded_file = st.file_uploader("Choose a file")
             if uploaded_file is not None:
-                # To read file as bytes:
+                # To read file as bytes:q   
                 # bytes_data = uploaded_file.getvalue()
                 st.write(uploaded_file.type + " uploaded")
 
@@ -141,8 +163,21 @@ def main():
                         st.error("State not found. Please enter a valid State Name.")
                 else:
                     st.error("Please fill in all the fields.")
+            if st.button("Show My Grievances"):
+                # Fetch grievances associated with the current user
+                user_id = st.session_state.user_id
+                user_grievances = fetch_user_grievances(user_id)
+
+                if user_grievances:
+                    st.write("Your Grievances:")
+                    for grievance in user_grievances:
+                        st.write(f"ID: {grievance['GrievanceId']}, Status: {grievance['Status']}, Description: {grievance['Description']}")
+                else:
+                    st.write("No grievances found for you.")        
         else:
             st.error("Please login to submit a grievance.")
+            
+            
 
     elif page == "View Grievances":
         st.title('Admin View')
@@ -187,9 +222,8 @@ def main():
                 st.write("No grievances found for", selected_state)
 
         # Text input for grievance ID
-        grievance_id = st.text_input('Enter Grievance ID:')
-        admin_comment = st.text_area('Enter Comment (Optional)')
-
+        grievance_id = st.text_input('Enter Grievance ID:') 
+        admin_comment = st.text_area('Enter Admin Comment (Optional)')
 
         # Button to resolve grievance
         if st.button('Resolve Grievance'):
@@ -204,20 +238,38 @@ def main():
                 cursor.execute(update_query)
                 connection.commit()
 
+                # Fetching user ID associated with the grievance
                 query = f"SELECT UserId FROM grievance WHERE GrievanceId = {grievance_id}"
                 cursor.execute(query)
-
                 commenter_id = cursor.fetchall()
-                st.write(commenter_id)
 
-                grievance_id = random.randint(1000, 9999)
-                query = f"insert into table comment values ({np.random.randint(1,100000)},{grievance_id}, '{commenter_id[0][0]}','{admin_comment}', '{date.today()}')"
-                st.write(query)
-                cursor.execute(query)
+                # Inserting comment into the comment table
+                comment_id = random.randint(1000, 9999)
+                comment_query = f"INSERT INTO comment (CommentId, GrievanceId, UserId, Comment, DateCommented) VALUES ({comment_id}, {grievance_id}, '{commenter_id[0][0]}', '{admin_comment}', '{date.today()}');"
+                cursor.execute(comment_query)
+                connection.commit()
 
                 st.success(f"Grievance {grievance_id} in {selected_state} has been resolved.")
             else:
                 st.error("Please enter a grievance ID.")
+
+        # Button to submit admin comment
+        if st.button('Submit Admin Comment'):
+            if grievance_id and admin_comment:
+                # Fetching user ID associated with the grievance
+                query = f"SELECT UserId FROM grievance WHERE GrievanceId = {grievance_id}"
+                cursor.execute(query)
+                commenter_id = cursor.fetchall()
+
+                # Inserting comment into the comment table
+                comment_id = random.randint(1000, 9999)
+                comment_query = f"INSERT INTO comment (CommentId, GrievanceId, UserId, Comment, DateCommented) VALUES ({comment_id}, {grievance_id}, '{commenter_id[0][0]}', '{admin_comment}', '{date.today()}');"
+                cursor.execute(comment_query)
+                connection.commit()
+
+                st.success("Admin comment submitted successfully.")
+            else:
+                st.error("Please enter a grievance ID and comment.")
 
 
 if __name__ == "__main__":
