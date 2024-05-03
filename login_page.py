@@ -140,7 +140,7 @@ def main():
             st.write("Welcome, " + st.session_state.user_id + "!")
             # Grievance submission form
             state_name = st.text_input("State Name")
-            category = st.selectbox("Category", ["Road Issues", "Water Issues"])
+            category = st.selectbox("Category", ["Road Issues", "Water Issues","Finance Issues", "Consumer Issues"])
             description = st.text_area("Description")
             date_submitted = st.date_input("Date Submitted")
             uploaded_file = st.file_uploader("Choose a file")
@@ -155,8 +155,12 @@ def main():
                     if state_id:
                         if category == "Road Issues":
                             department_id = "UD"
-                        else:
+                        elif category == "Water Issues":
                             department_id = "PW"
+                        elif category == "Finance Issues":
+                            department_id = "FIN"
+                        elif category == "Consumer Issues":
+                            department_id = "MKTG"        
                         insert_grievance(state_id, st.session_state.user_id, category, description, date_submitted, department_id)
                         st.success("Grievance submitted successfully!")
                     else:
