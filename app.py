@@ -12,7 +12,6 @@ def authenticate(username, password):
     data = cursor.fetchall()
     return data
 
-
 # Function to retrieve StateId based on StateName
 def get_state_id(state_name):
     cursor.execute("SELECT StateId FROM state WHERE StateName = %s", (state_name,))
