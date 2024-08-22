@@ -50,4 +50,3 @@ insert into comment (commentid, grievanceid, userid, comment, datecommented)
 values (1, 1, 'admin', 'water tanker dispatched to your area. expect supply within 2 hours', '2024-04-02');
 insert into comment (commentid, grievanceid, userid, comment, datecommented)
 values (2, 2, 'user456', 'images attached for reference', '2024-03-02');
-
